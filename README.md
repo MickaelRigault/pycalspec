@@ -3,7 +3,7 @@ Simple python library to access (download, store,...) CalSpec spectrum
 
 Details about calspec: http://www.stsci.edu/hst/observatory/crds/calspec.html
 
-# Installation
+## Installation
 
 using pip
 ```
@@ -17,7 +17,7 @@ python setup.py install
 ```
 
 
-# usage
+## Usage
 
 Have access to the coordinate of a CalSpec standard star:
 ```python
