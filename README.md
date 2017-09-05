@@ -6,6 +6,7 @@ Details about calspec: http://www.stsci.edu/hst/observatory/crds/calspec.html
 ## Installation
 
 using pip
+[![PyPI](https://img.shields.io/pypi/v/pycalspec.svg?style=flat-square)](https://pypi.python.org/pypi/pycalspec)
 ```
 sudo pip install pycalspec
 ```
