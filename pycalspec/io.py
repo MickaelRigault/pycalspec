@@ -14,7 +14,7 @@ from astropy.io import fits
 
 __all__ = ["std_radec", "std_spectrum", "download_calspec"]
 
-_DATASOURCE = os.path.dirname(os.path.realpath(__file__))+"/data/"
+_DATASOURCE = os.getenv('CALSPECDIR', default=os.path.dirname(os.path.realpath(__file__))+"/data/")
 _name = [0,12]
 _ra   = [12,25]
 _dec  = [25,38]
@@ -43,6 +43,7 @@ def std_radec(stdname):
     """
     caldata = calspec_data()
     if stdname not in caldata.keys():
+        print('known targets', ", ".join(caldata.keys()))
         raise ValueError("Unknown standard '%s' [be careful. Case sensitive]"%stdname)
     
     return caldata[stdname]["ra"],caldata[stdname]["dec"]
