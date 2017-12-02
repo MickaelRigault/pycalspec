@@ -14,7 +14,7 @@ from astropy.io import fits
 
 __all__ = ["std_radec", "std_spectrum", "download_calspec"]
 
-_DATASOURCE = os.getenv('CALSPECDIR', default=os.path.dirname(os.path.realpath(__file__))+"/data/")
+_DATASOURCE = os.getenv('CALSPECPATH', default=os.path.dirname(os.path.realpath(__file__))+"/data/")
 
 _name = [0,12]
 _ra   = [12,25]
