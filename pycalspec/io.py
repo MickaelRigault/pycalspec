@@ -6,7 +6,7 @@
 
 import pyifu
 import inspect, os
-
+import shutil
 import numpy as np
 
 from glob import glob
@@ -132,7 +132,7 @@ def download_calspec(stdname, outdir=None):
     for file_to_dl in [f_ for f_ in list_of_calspec_files
                            if stdname.lower()+"_" in f_.lower()]:
         filedl = download_file("ftp://"+CALSPEC_SERVER+"/"+CALSPEC_DIR+file_to_dl)
-        os.rename(filedl, outdir+file_to_dl.lower())
+        shutil.move(filedl, outdir+file_to_dl.lower())
         
 
 def get_list_of_calspec_files():
