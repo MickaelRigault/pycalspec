@@ -44,7 +44,7 @@ def std_radec(stdname):
     """
     caldata = calspec_data()
     if stdname not in caldata.keys():
-        print('known targets', ", ".join(caldata.keys()))
+        print('known targets', ", ".join(list(caldata.keys())))
         raise ValueError("Unknown standard '%s' [be careful. Case sensitive]"%stdname)
     
     return caldata[stdname]["ra"],caldata[stdname]["dec"]
