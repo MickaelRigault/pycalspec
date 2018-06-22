@@ -43,6 +43,7 @@ def std_radec(stdname):
     Target (astrobject's)
     """
     caldata = calspec_data()
+    stdname = _calspec_data_parse_name_(stdname)
     if stdname not in caldata.keys():
         print('known targets', ", ".join(list(caldata.keys())))
         raise ValueError("Unknown standard '%s' [be careful. Case sensitive]"%stdname)
@@ -60,11 +61,16 @@ def std_spectrum(stdname):
     return get_spectrum(lbda, flux, variance=var)
 
 
-def parse_name(stdname):
+def _calspec_data_parse_name_(stdname):
     """ """
     if "BD+" in stdname:
         return stdname.replace("d","")
     return stdname
+
+def _calspec_file_parse_name_(stdname):
+    """ """
+    return stdname.replace("+","_").lower()
+    
 
 # ===================== #
 #   Internal Tools      #
@@ -98,9 +104,8 @@ def calspec_file(stdname, download=True):
     -------
     string (FULLPATH)
     """
-    stdname = parse_name(stdname)
-    
-    specfile = glob(_DATASOURCE+"%s_*.fits"%stdname.lower())
+    stdname = _calspec_file_parse_name_(stdname)
+    specfile = glob(_DATASOURCE+"%s_*.fits"%stdname)
     if len(specfile)==0:
         if download:
             download_calspec(stdname)
