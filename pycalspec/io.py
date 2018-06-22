@@ -60,7 +60,12 @@ def std_spectrum(stdname):
     return get_spectrum(lbda, flux, variance=var)
 
 
-    
+def parse_name(stdname):
+    """ """
+    if "BD+" in stdname:
+        return stdname.replace("d","")
+    return stdname
+
 # ===================== #
 #   Internal Tools      #
 # ===================== #
@@ -93,6 +98,8 @@ def calspec_file(stdname, download=True):
     -------
     string (FULLPATH)
     """
+    stdname = parse_name(stdname)
+    
     specfile = glob(_DATASOURCE+"%s_*.fits"%stdname.lower())
     if len(specfile)==0:
         if download:
