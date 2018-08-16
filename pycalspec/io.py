@@ -57,7 +57,19 @@ def std_spectrum(stdname):
     # - the arrays
     lbda = std_[1].data["WAVELENGTH"]
     flux = std_[1].data["FLUX"]
-    var  = std_[1].data["STATERROR"]**2 + std_[1].data["SYSERROR"]**2
+    
+    if "STATERROR" in std_[1].data.names and "SYSERROR" in std_[1].data.names:
+        var  = std_[1].data["STATERROR"]**2 + std_[1].data["SYSERROR"]**2
+        
+    elif "SYSERROR" in std_[1].data.names:
+        var  = std_[1].data["SYSERROR"]**2
+        
+    elif "STATERROR" in std_[1].data.names:
+        var  = std_[1].data["STATERROR"]**2
+        
+    else:
+        var = None
+        
     return get_spectrum(lbda, flux, variance=var)
 
 
@@ -113,7 +125,7 @@ def calspec_file(stdname, download=True):
         else:
             raise IOError("Currently no spectra for %s. \n"%stdname+\
                             "Look for it from http://www.stsci.edu/ftp/cdbs/current_calspec/ and save in at %s"%(_DATASOURCE))
-    return specfile[-1]
+    return np.sort(specfile)[-1]
                         
     
 def download_calspec(stdname, outdir=None):

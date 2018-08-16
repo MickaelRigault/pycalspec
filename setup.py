@@ -10,8 +10,8 @@ MAINTAINER = 'Mickael Rigault'
 MAINTAINER_EMAIL = 'mrigault@physik.hu-berlin.de'
 URL = 'https://github.com/MickaelRigault/pycalspec'
 LICENSE = 'Apache 2.0'
-DOWNLOAD_URL = 'https://github.com/MickaelRigault/pycalspec/0.2'
-VERSION = '0.3.2'
+DOWNLOAD_URL = 'https://github.com/MickaelRigault/pycalspec/0.3'
+VERSION = '0.3.4'
 
 try:
     from setuptools import setup, find_packages
