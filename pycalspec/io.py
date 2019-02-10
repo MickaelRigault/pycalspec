@@ -43,7 +43,7 @@ def std_radec(stdname):
     Target (astrobject's)
     """
     caldata = calspec_data()
-    stdname = _calspec_data_parse_name_(stdname)
+    stdname = _calspec_data_parse_name_(stdname).upper()
     if stdname not in caldata.keys():
         print('known targets', ", ".join(list(caldata.keys())))
         raise ValueError("Unknown standard '%s' [be careful. Case sensitive]"%stdname)
@@ -97,7 +97,7 @@ def calspec_data():
     """
     calfile = open(_DATASOURCE+"calspec_sources.dat").read().splitlines()
     
-    return { str(l[_name[0]:_name[1]]).replace(" ",""): {
+    return { str(l[_name[0]:_name[1]]).replace(" ","").upper(): {
         "ra": ":".join(str(l[_ra[0]:_ra[1]]).replace("\t","").split()),
         "dec": ":".join(str(l[_dec[0]:_dec[1]]).replace("\t","").split())
         }
