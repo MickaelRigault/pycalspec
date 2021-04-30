@@ -7,6 +7,7 @@
 import pyifu
 import inspect, os
 import shutil
+import warnings
 import numpy as np
 
 from glob import glob
@@ -26,6 +27,11 @@ _SimName = [53,-1]
 # Source
 CALSPEC_SERVER = "ftp.stsci.edu"
 CALSPEC_DIR    = "cdbs/current_calspec/"
+
+LOCAL_CURRENT_CALSPEC = os.path.join(_DATASOURCE,"current_calspec_list.txt")
+LOCAL_CALSPEC = os.path.join(_DATASOURCE,"calspec_list.txt")
+CURRENT_CALSPEC_ARCHIVE_URL = "https://archive.stsci.edu/hlsps/reference-atlases/cdbs/current_calspec"
+CALSPEC_ARCHIVE_URL = "https://archive.stsci.edu/hlsps/reference-atlases/cdbs/calspec"
 # ===================== #
 #   Main Tools          #
 # ===================== #
@@ -103,7 +109,7 @@ def calspec_data():
         }
           for l in calfile[1:] }
         
-def calspec_file(stdname, download=True):
+def calspec_file(stdname, use_current=True, download=True):
     """ get the fullpath of file containing the standard star spectrum.
 
     Parameters
@@ -117,7 +123,7 @@ def calspec_file(stdname, download=True):
     string (FULLPATH)
     """
     stdname = _calspec_file_parse_name_(stdname)
-    specfile = glob(_DATASOURCE+"%s_*.fits"%stdname)
+    specfile = glob( os.path.join(_DATASOURCE,f"{stdname}_*.fits") )
     if len(specfile)==0:
         if download:
             download_calspec(stdname)
@@ -128,7 +134,7 @@ def calspec_file(stdname, download=True):
     return np.sort(specfile)[-1]
                         
     
-def download_calspec(stdname, outdir=None):
+def download_calspec(stdname, outdir=None, warn=True):
     """ look at the calspec spectra under ftp.stsci.edu/cdbs/current_calspec/ 
     (see get_list_of_calspec_files()) and download the one corresponding to stdname
     The files are saved under the ./data/calspec/ directory except if said otherwise.
@@ -149,17 +155,40 @@ def download_calspec(stdname, outdir=None):
     """
     
     from astropy.utils.data import download_file
-    list_of_calspec_files = get_list_of_calspec_files()
     if outdir is None:
         outdir = _DATASOURCE
+
+    if not os.path.isdir(outdir):
+        os.makedirs(outdir, exist_ok=True)
+
+    
+    list_of_calspec_files = get_list_of_calspec_files(use_current=True)
+    files_to_dl = [f_ for f_ in list_of_calspec_files if stdname.lower()+"_" in f_.lower()]
+    source = CURRENT_CALSPEC_ARCHIVE_URL
+    if len(files_to_dl) ==0:
+        list_of_calspec_files = get_list_of_calspec_files(use_current=False)
+        files_to_dl = [f_ for f_ in list_of_calspec_files if stdname.lower()+"_" in f_.lower()]
+        source = CALSPEC_ARCHIVE_URL
+    if len(files_to_dl) ==0:
+        raise ValueError(f"no calspec file corresponding to {stdname} found in calspec_current or calspec.")
+    
         
-    for file_to_dl in [f_ for f_ in list_of_calspec_files
-                           if stdname.lower()+"_" in f_.lower()]:
-        filedl = download_file("ftp://"+CALSPEC_SERVER+"/"+CALSPEC_DIR+file_to_dl)
-        shutil.move(filedl, outdir+file_to_dl.lower())
+    for file_to_dl in files_to_dl:
+        filedl = download_file( os.path.join(source,file_to_dl) )
+        fileout = os.path.join(outdir,file_to_dl.lower())
+        if warn:
+            warnings.warn(f"Storing {file_to_dl} here {fileout}")
+        shutil.move(filedl, fileout)
         
 
-def get_list_of_calspec_files():
+def get_list_of_calspec_files(use_current=True, force_dl=False):
+    """ """
+    datafile = LOCAL_CALSPEC if not use_current else LOCAL_CURRENT_CALSPEC
+    if not os.path.isfile(datafile) or force_dl:
+        return download_list_of_calspec_files(use_current,store=True)
+    return open(datafile).read().splitlines()
+        
+def download_list_of_calspec_files(use_current=True, store=True):
     """ get the list of all the CalSpec files that exist under 
     ftp.stsci.edu/cdbs/current_calspec/ 
     
@@ -167,10 +196,18 @@ def get_list_of_calspec_files():
     -------
     list 
     """
-    from ftplib import FTP
-    ftp = FTP(CALSPEC_SERVER)
-    ftp.login()
-    ftp.cwd(CALSPEC_DIR)
-    list_of_files = ftp.nlst()
-    ftp.close()
+    import requests
+    calspeclit = requests.get(CALSPEC_ARCHIVE_URL if not use_current else \
+                                  CURRENT_CALSPEC_ARCHIVE_URL)
+    list_of_files = [l.split("</a>")[0].split(">")[-1]
+                         for l in calspeclit.text.splitlines() if ".fits" in l]
+    if store:
+        fileout = LOCAL_CALSPEC if not use_current else LOCAL_CURRENT_CALSPEC
+        dirout = os.path.dirname(fileout)
+        if not os.path.isdir( dirout):
+            os.makedirs(dirout, exist_ok=True)
+            
+        with open(fileout, "w") as fileout_:
+            for l in list_of_files:
+                fileout_.write(l+"\n")
     return list_of_files
