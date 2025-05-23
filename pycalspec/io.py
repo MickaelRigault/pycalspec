@@ -73,8 +73,12 @@ def std_spectrum(stdname):
         
     else:
         var = None
-        
-    return lbda, flux, variance=var
+
+    try: # for pysedm legacy
+        from pyifu import get_spectrum
+        return get_spectrum(lbda, flux, variance=var)
+    except:
+        return lbda, flux, var
 
 
 def _calspec_data_parse_name_(stdname):
