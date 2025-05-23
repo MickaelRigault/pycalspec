@@ -4,7 +4,6 @@
 
 """ Module associated to standard stars used for calibration """
 
-import pyifu
 import inspect, os
 import shutil
 import warnings
@@ -15,7 +14,7 @@ from astropy.io import fits
 
 __all__ = ["std_radec", "std_spectrum", "download_calspec"]
 
-_DATASOURCE = os.getenv('CALSPECPATH', default=os.path.dirname(os.path.realpath(__file__))+"/data/")
+_DATASOURCE = os.getenv('CALSPECPATH', None)
 
 _name = [0,12]
 _ra   = [12,25]
@@ -28,8 +27,8 @@ _SimName = [53,-1]
 CALSPEC_SERVER = "ftp.stsci.edu"
 CALSPEC_DIR    = "cdbs/current_calspec/"
 
-LOCAL_CURRENT_CALSPEC = os.path.join(_DATASOURCE,"current_calspec_list.txt")
-LOCAL_CALSPEC = os.path.join(_DATASOURCE,"calspec_list.txt")
+LOCAL_CURRENT_CALSPEC = os.path.join(_DATASOURCE, "current_calspec_list.txt")
+LOCAL_CALSPEC = os.path.join(_DATASOURCE, "calspec_list.txt")
 CURRENT_CALSPEC_ARCHIVE_URL = "https://archive.stsci.edu/hlsps/reference-atlases/cdbs/current_calspec"
 CALSPEC_ARCHIVE_URL = "https://archive.stsci.edu/hlsps/reference-atlases/cdbs/calspec"
 # ===================== #
@@ -58,7 +57,6 @@ def std_radec(stdname):
 
 def std_spectrum(stdname):
     """ """
-    from pyifu.spectroscopy import get_spectrum
     std_  = fits.open(calspec_file(stdname))
     # - the arrays
     lbda = std_[1].data["WAVELENGTH"]
@@ -76,7 +74,7 @@ def std_spectrum(stdname):
     else:
         var = None
         
-    return get_spectrum(lbda, flux, variance=var)
+    return lbda, flux, variance=var
 
 
 def _calspec_data_parse_name_(stdname):
@@ -101,7 +99,7 @@ def calspec_data():
     -------
     dict
     """
-    calfile = open(_DATASOURCE+"calspec_sources.dat").read().splitlines()
+    calfile = os.path.join(_DATASOURCE, "calspec_sources.dat").read().splitlines()
     
     return { str(l[_name[0]:_name[1]]).replace(" ","").upper(): {
         "ra": ":".join(str(l[_ra[0]:_ra[1]]).replace("\t","").split()),
